@@ -30,7 +30,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The dependency list includes several large scientific packages. Installation time and platform support can vary.
+The runtime dependency list contains only packages imported by the application or its optional data paths. TensorFlow, scikit-learn, and Matplotlib are not required.
 
 Authenticated NASA Earthdata requests require your own runtime token. See [NASA_TOKEN_SETUP.md](NASA_TOKEN_SETUP.md); the application reads only `EARTHDATA_TOKEN` and does not need a credential committed to the repository.
 
@@ -44,6 +44,11 @@ python -m unittest discover -s tests -v
 ```
 
 GitHub Actions runs the same checks for every push and pull request.
+It also installs the declared runtime dependencies, starts Streamlit, and checks the health endpoint.
+
+## License
+
+The code is available under the [MIT License](LICENSE). Documentation and external datasets may have their own terms.
 
 ## Security note
 
