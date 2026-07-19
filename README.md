@@ -14,6 +14,7 @@ This repository is a **learning prototype**, not a wildlife-tracking system, val
 ## Important limits
 
 - The current environmental layers used by the main prototype are simulated or generated in code.
+- Generated paths use a fixed default seed (`2339`) so the same workflow is reproducible.
 - The repository does not provide live shark locations or confirm that sharks are present in a suggested area.
 - The habitat scores have not been validated against tagged-animal observations, field surveys, or peer-reviewed ecological benchmarks.
 - No claim of professional accuracy, research-grade quality, real-time satellite ingestion, or conservation suitability is made.
