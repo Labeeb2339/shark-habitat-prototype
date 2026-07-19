@@ -1,7 +1,7 @@
-"""
-AUTOMATIC NASA Data Integration Framework
-Fully automated real NASA data download + shark habitat prediction
-Maximum accuracy for NASA competition
+"""NASA metadata and prototype habitat-scoring framework.
+
+This module is educational software. Generated environmental grids and
+heuristic scores are not satellite measurements or validated ecology.
 """
 
 import requests
@@ -11,11 +11,31 @@ import numpy as np
 import pandas as pd
 from datetime import datetime, timedelta
 import os
+import sys
+
+
+def _configure_console_output():
+    """Avoid Unicode logging failures on Windows consoles using legacy encodings."""
+    if sys.stdout is None or not hasattr(sys.stdout, "reconfigure"):
+        return
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError):
+        pass
+
+
+_configure_console_output()
 
 class AutomaticNASAFramework:
-    """Fully automatic NASA data integration with real-time download"""
+    """Prepare prototype environmental layers and habitat scores."""
     
-    def __init__(self, species='great_white'):
+    def __init__(self, species='great_white', seed=2339):
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise TypeError("seed must be an integer")
+
+        self.seed = seed
+        self.rng = np.random.default_rng(seed)
+
         # Credentials are runtime-only. Never commit an Earthdata token.
         self.jwt_token = os.environ.get("EARTHDATA_TOKEN")
         print("🛰️ NASA Earthdata integration initialising")
@@ -24,7 +44,7 @@ class AutomaticNASAFramework:
 
         self.headers = {
             'Accept': 'application/json',
-            'User-Agent': 'NASA-Competition-SharkHabitat/1.0'
+            'User-Agent': 'SharkHabitatPrototype/1.0'
         }
 
         if self.jwt_token:
@@ -996,22 +1016,28 @@ class AutomaticNASAFramework:
         }
 
     def auto_download_nasa_data(self, study_area, date_range):
-        """Automatically download real NASA data with auto-refresh tokens"""
+        """Query NASA metadata and prepare explicitly labelled prototype grids."""
 
-        print("🛰️ AUTOMATIC NASA DATA DOWNLOAD (REAL DATA)")
+        print("🛰️ NASA METADATA LOOKUP AND PROTOTYPE GRID PREPARATION")
         print("=" * 50)
         print(f"📍 Study Area: {study_area['name']}")
         print(f"📅 Date Range: {date_range[0]} to {date_range[1]}")
 
-        # Using real NASA data with fresh token
-        print("🔑 Using fresh NASA JWT token for real data access")
+        if self.jwt_token:
+            print("🔑 Using EARTHDATA_TOKEN for authenticated requests")
+        else:
+            print("ℹ️ Continuing without authenticated Earthdata access")
 
         # Search for available data
         bbox = f"{study_area['bounds'][0]},{study_area['bounds'][1]},{study_area['bounds'][2]},{study_area['bounds'][3]}"
         temporal = f"{date_range[0]}T00:00:00Z,{date_range[1]}T23:59:59Z"
 
-        real_data = {}
-        real_data_success = False
+        real_data = {
+            'evidence_boundary': (
+                'CMR search results are metadata. Generated fallback grids are '
+                'prototype inputs, not satellite measurements.'
+            )
+        }
         
         # Try to get SST data
         print("\n🌡️ Searching for Sea Surface Temperature data...")
@@ -1075,25 +1101,25 @@ class AutomaticNASAFramework:
             print(f"   ⚠️ Chlorophyll search error: {e}")
             real_data['chl_available'] = False
         
-        # REAL NASA DATA ONLY - Require at least SST data
+        # The current workflow requires matching SST metadata before continuing.
         if not real_data.get('sst_available'):
-            print("❌ REAL NASA SST DATA REQUIRED - Cannot proceed without sea surface temperature")
-            print("🔑 Please check your NASA JWT token and internet connection")
+            print("❌ No matching SST metadata found; prototype grid not created")
+            print("🔑 Check the date, bounds, network, and Earthdata configuration")
             return None, real_data
 
         if not real_data.get('chl_available'):
             print("⚠️ NASA Chlorophyll data not available - will use SST-based productivity estimates")
 
-        print(f"\n🌊 Downloading real NASA bathymetry data...")
+        print(f"\n🌊 Preparing bathymetry input...")
         bathymetry_data = self._download_real_bathymetry_data(study_area)
 
-        print(f"\n📊 Processing real NASA environmental data...")
+        print(f"\n📊 Preparing environmental prototype grids...")
         environmental_data = self._process_real_nasa_data(study_area, real_data, bathymetry_data)
 
         return environmental_data, real_data
 
     def _process_sst_granules(self, granules, bounds, grid_size):
-        """Process real NASA SST granules into grid format"""
+        """Generate a deterministic SST demo grid after a metadata match."""
         try:
             # For now, create a realistic grid based on granule metadata
             # In a full implementation, you would download and process the actual NetCDF files
@@ -1117,7 +1143,7 @@ class AutomaticNASAFramework:
                 for j, lon in enumerate(lons):
                     # Create realistic SST based on location
                     temp = base_temp + (30 - abs(lat)) * 0.3  # Latitude effect
-                    temp += np.random.normal(0, 1.0)  # Natural variation
+                    temp += self.rng.normal(0, 1.0)  # Seeded demo variation
                     temp = max(5, min(35, temp))  # Realistic range
                     row.append(temp)
                 grid.append(row)
@@ -1129,7 +1155,7 @@ class AutomaticNASAFramework:
             return None
 
     def _process_chl_granules(self, granules, bounds, grid_size):
-        """Process real NASA Chlorophyll granules into grid format"""
+        """Generate a deterministic chlorophyll demo grid."""
         try:
             grid = []
             lats = np.linspace(bounds[1], bounds[3], grid_size)
@@ -1142,9 +1168,9 @@ class AutomaticNASAFramework:
                     coastal_distance = min(abs(lon - bounds[0]), abs(lon - bounds[2]))
 
                     if coastal_distance < 1:  # Coastal waters
-                        chl = 2.0 + np.random.exponential(1.0)
+                        chl = 2.0 + self.rng.exponential(1.0)
                     else:  # Open ocean
-                        chl = 0.3 + np.random.exponential(0.2)
+                        chl = 0.3 + self.rng.exponential(0.2)
 
                     chl = max(0.01, min(50, chl))
                     row.append(chl)
@@ -1157,7 +1183,7 @@ class AutomaticNASAFramework:
             return None
 
     def _process_bathymetry_response(self, response, bounds):
-        """Process real bathymetry data response"""
+        """Generate a deterministic bathymetry demo grid."""
         try:
             # Create realistic bathymetry grid
             grid_size = 25
@@ -1173,20 +1199,20 @@ class AutomaticNASAFramework:
                     coastal_distance = min(abs(lon - bounds[0]), abs(lon - bounds[2]))
 
                     if coastal_distance < 0.5:  # Very close to coast
-                        depth = -np.random.uniform(10, 100)
+                        depth = -self.rng.uniform(10, 100)
                     elif coastal_distance < 2:  # Continental shelf
-                        depth = -np.random.uniform(100, 500)
+                        depth = -self.rng.uniform(100, 500)
                     else:  # Deep ocean
-                        depth = -np.random.uniform(1000, 4000)
+                        depth = -self.rng.uniform(1000, 4000)
 
                     row.append(depth)
                 grid.append(row)
 
             return {
                 'depth_data': grid,
-                'source': 'NOAA ETOPO',
-                'resolution': '1 arc-minute',
-                'quality': 'Real Bathymetry Data'
+                'source': 'Deterministic generated bathymetry prototype',
+                'resolution': f'{grid_size}x{grid_size} demo grid',
+                'quality': 'Unvalidated generated values'
             }
 
         except Exception as e:
@@ -1194,8 +1220,8 @@ class AutomaticNASAFramework:
             return None
 
     def _estimate_productivity_from_sst(self, sst_data, bounds, grid_size):
-        """Estimate chlorophyll productivity from real NASA SST data"""
-        print("      🔄 Estimating productivity from real NASA SST data...")
+        """Estimate a prototype productivity layer from the supplied SST grid."""
+        print("      🔄 Estimating a prototype productivity layer from SST...")
 
         try:
             chl_grid = []
@@ -1226,7 +1252,7 @@ class AutomaticNASAFramework:
 
                 chl_grid.append(chl_row)
 
-            print("      ✅ Productivity estimated from real NASA SST")
+            print("      ✅ Prototype productivity layer estimated from SST")
             return chl_grid
 
         except Exception as e:
@@ -1574,7 +1600,7 @@ class AutomaticNASAFramework:
                 mean_value = np.nanmean(data_array)
                 if not np.isnan(mean_value):
                     # Fill grid with realistic variation around mean
-                    noise = np.random.normal(0, abs(mean_value) * 0.1, (grid_size, grid_size))
+                    noise = self.rng.normal(0, abs(mean_value) * 0.1, (grid_size, grid_size))
                     grid_data = mean_value + noise
                     print(f"         ✅ Created grid from NetCDF mean: {mean_value:.2f}")
 
@@ -1679,7 +1705,7 @@ class AutomaticNASAFramework:
             return None
 
     def _process_real_nasa_data(self, study_area, real_data_info, bathymetry_data):
-        """Process REAL NASA satellite data ONLY - NO SYNTHETIC GENERATION"""
+        """Build prototype environmental layers from available inputs."""
         
         bounds = study_area['bounds']  # [west, south, east, north]
         grid_size = 25  # High resolution
@@ -1688,49 +1714,49 @@ class AutomaticNASAFramework:
         lats = np.linspace(bounds[1], bounds[3], grid_size)
         lons = np.linspace(bounds[0], bounds[2], grid_size)
         
-        # Download real NASA MODIS SST data
-        print("   🌡️ Downloading real NASA MODIS SST data...")
+        # Attempt direct processing; otherwise the helper creates a labelled demo grid.
+        print("   🌡️ Preparing SST input...")
         sst_data = self._download_real_sst_grid(bounds, grid_size)
         if sst_data is None:
-            print("   ❌ FAILED: Could not download real NASA SST data")
+            print("   ❌ FAILED: Could not prepare an SST input")
             return None
         
-        # Download real NASA MODIS Chlorophyll data (optional)
-        print("   🌱 Downloading real NASA MODIS Chlorophyll data...")
+        # Prepare chlorophyll input (optional).
+        print("   🌱 Preparing chlorophyll input...")
         chl_data = self._download_real_chl_grid(bounds, grid_size)
         if chl_data is None:
             print("   ⚠️ NASA Chlorophyll data not available - generating productivity estimates from SST")
             chl_data = self._estimate_productivity_from_sst(sst_data, bounds, grid_size)
 
-        # Return processed real NASA data
+        # Labels stay conservative because metadata fallbacks generate demo grids.
         return {
             'sst': {
                 'data': sst_data,
                 'latitudes': lats.tolist(),
                 'longitudes': lons.tolist(),
-                'source': 'NASA MODIS Aqua SST (REAL SATELLITE DATA)',
-                'accuracy': '±0.4°C (NASA specification)',
-                'resolution': '4km',
-                'algorithm': 'MODIS SST Algorithm v2022.0',
-                'data_type': 'REAL NASA SATELLITE DATA'
+                'source': 'NASA CMR metadata with prototype grid processing',
+                'accuracy': 'Not validated',
+                'resolution': f'{grid_size}x{grid_size} demo grid',
+                'algorithm': 'Prototype SST processing path',
+                'data_type': 'PROTOTYPE ENVIRONMENTAL GRID'
             },
             'chlorophyll': {
                 'data': chl_data,
                 'latitudes': lats.tolist(),
                 'longitudes': lons.tolist(),
-                'source': 'NASA MODIS Aqua Ocean Color (REAL SATELLITE DATA)',
-                'accuracy': '±35% (NASA specification)',
-                'resolution': '4km',
-                'algorithm': 'NASA OC3M Chlorophyll Algorithm',
-                'data_type': 'REAL NASA SATELLITE DATA'
+                'source': 'NASA CMR metadata with prototype grid processing',
+                'accuracy': 'Not validated',
+                'resolution': f'{grid_size}x{grid_size} demo grid',
+                'algorithm': 'Prototype chlorophyll processing path',
+                'data_type': 'PROTOTYPE ENVIRONMENTAL GRID'
             },
             'bathymetry': {
                 'data': bathymetry_data['depth_data'] if bathymetry_data else None,
-                'source': 'NOAA ETOPO (REAL BATHYMETRY DATA)',
-                'accuracy': '±15m (Global standard)',
-                'resolution': '500m',
-                'algorithm': 'Multi-beam sonar compilation',
-                'quality': bathymetry_data.get('quality', 'Real Bathymetry Data') if bathymetry_data else 'No data'
+                'source': 'Prototype bathymetry input',
+                'accuracy': 'Not validated',
+                'resolution': f'{grid_size}x{grid_size} demo grid',
+                'algorithm': 'Generated depth heuristic',
+                'quality': bathymetry_data.get('quality', 'Unvalidated') if bathymetry_data else 'No data'
             }
         }
 
@@ -1777,7 +1803,7 @@ class AutomaticNASAFramework:
         }
     
     def advanced_habitat_prediction(self, environmental_data):
-        """Advanced habitat suitability prediction with real NASA data"""
+        """Calculate an unvalidated heuristic suitability score."""
         
         print("\n🧮 ADVANCED HABITAT SUITABILITY ANALYSIS")
         print("=" * 50)
@@ -2514,9 +2540,9 @@ class AutomaticNASAFramework:
         # Simplified eddy detection (would use real eddy tracking data)
         eddy_probability = 0.15  # 15% chance of eddy presence
 
-        if np.random.random() < eddy_probability:
+        if self.rng.random() < eddy_probability:
             # Determine eddy type
-            if np.random.random() < 0.6:
+            if self.rng.random() < 0.6:
                 # Cold-core eddy (more common)
                 eddy_type = self.ocean_dynamics['mesoscale_eddies']['cold_core_eddies']
                 temp_anomaly = eddy_type['temperature_anomaly']  # -1.5°C
@@ -2720,9 +2746,9 @@ class AutomaticNASAFramework:
         else:
             storm_probability = 0.05
 
-        if np.random.random() < storm_probability:
+        if self.rng.random() < storm_probability:
             # Storm present - determine category (simplified)
-            storm_category = np.random.choice(['cat_1', 'cat_2', 'cat_3'], p=[0.5, 0.3, 0.2])
+            storm_category = self.rng.choice(['cat_1', 'cat_2', 'cat_3'], p=[0.5, 0.3, 0.2])
             storm_data = storm_params['hurricane_categories'][storm_category]
 
             # Species-specific storm response
@@ -3060,7 +3086,7 @@ class AutomaticNASAFramework:
                         validation_results['correct_predictions'] += 1
 
                     # Calculate spatial error (simplified)
-                    spatial_error = accuracy_radius * np.random.uniform(0.5, 1.5)
+                    spatial_error = accuracy_radius * self.rng.uniform(0.5, 1.5)
                     validation_results['spatial_errors'].append(spatial_error)
 
                 validation_results['total_points'] += 1
@@ -3236,11 +3262,11 @@ class AutomaticNASAFramework:
         return hsi
 
 def run_automatic_nasa_framework():
-    """Run the complete automatic NASA framework"""
+    """Run the command-line prototype demonstration."""
     
-    print("🚀 AUTOMATIC NASA COMPETITION FRAMEWORK")
+    print("🚀 SHARK HABITAT SUITABILITY PROTOTYPE")
     print("=" * 80)
-    print("Real NASA Data + Advanced Mathematical Models + Competition Ready")
+    print("Deterministic heuristic demo; not validated ecological evidence")
     
     # Initialize framework with Great White as default
     framework = AutomaticNASAFramework('great_white')
@@ -3260,6 +3286,9 @@ def run_automatic_nasa_framework():
     
     # Step 1: Automatic NASA data download
     environmental_data, real_data_info = framework.auto_download_nasa_data(study_area, date_range)
+    if environmental_data is None:
+        print("No environmental prototype grid could be prepared.")
+        return None
     
     # Step 2: Advanced habitat prediction
     results = framework.advanced_habitat_prediction(environmental_data)
@@ -3284,7 +3313,7 @@ def run_automatic_nasa_framework():
     print(f"   🟠 Poor (0.2-0.4): {zones['poor']:.1%}")
     print(f"   🔴 Unsuitable (<0.2): {zones['unsuitable']:.1%}")
     
-    print(f"\n🛰️ NASA DATA INTEGRATION STATUS:")
+    print(f"\n🛰️ INPUT PROVENANCE STATUS:")
     sst_info = environmental_data['sst']
     chl_info = environmental_data['chlorophyll']
     bath_info = environmental_data['bathymetry']
@@ -3298,29 +3327,12 @@ def run_automatic_nasa_framework():
     print(f"   Bathymetry Accuracy: {bath_info['accuracy']}")
     print(f"   Bathymetry Quality: {bath_info['quality']}")
     
-    print(f"\n🏆 NASA COMPETITION FRAMEWORK STATUS:")
-    print(f"   ✅ Real NASA API Integration (JWT authenticated)")
-    print(f"   ✅ Multi-Species Analysis (6 shark species)")
-    print(f"   ✅ Advanced Mathematical Models (Literature-based)")
-    print(f"   ✅ Bioenergetic Temperature Model (Sharpe-Schoolfield)")
-    print(f"   ✅ Trophic Transfer Model (Eppley + Lindeman)")
-    print(f"   ✅ Frontal Zone Dynamics (Gradient-based)")
-    print(f"   ✅ Bathymetry Integration (GEBCO/ETOPO)")
-    print(f"   ✅ Species-Specific Depth Preferences")
-    print(f"   ✅ Temporal Analysis Capabilities")
-    print(f"   ✅ Uncertainty Quantification (Full error propagation)")
-    print(f"   ✅ High-Resolution Analysis ({len(results['hsi'])}×{len(results['hsi'][0])} grid)")
-    print(f"   ✅ Competition-Ready Output")
-    
-    print(f"\n🎯 FRAMEWORK ACCURACY LEVEL: MAXIMUM")
-    print(f"   🛰️ Real NASA satellite data integration")
-    print(f"   🧮 Competition-grade mathematical models")
-    print(f"   📊 Professional uncertainty quantification")
-    print(f"   🦈 Multi-species ecological parameters (6 species)")
-    print(f"   🌊 Bathymetry-integrated depth modeling")
-    print(f"   📅 Temporal analysis capabilities")
-    print(f"   🔬 Species differentiation methodology")
-    
+    print(f"\n🔬 EVIDENCE BOUNDARY:")
+    print(f"   • Software and visualization prototype")
+    print(f"   • Generated fallbacks are deterministic with seed {framework.seed}")
+    print(f"   • No tagged-shark, field-survey, or ecological benchmark validation")
+    print(f"   • Not suitable for safety, conservation, or policy decisions")
+
     return results
 
 if __name__ == "__main__":
