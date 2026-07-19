@@ -32,17 +32,29 @@ streamlit run app.py
 
 The dependency list includes several large scientific packages. Installation time and platform support can vary.
 
+Authenticated NASA Earthdata requests require your own runtime token. See [NASA_TOKEN_SETUP.md](NASA_TOKEN_SETUP.md); the application reads only `EARTHDATA_TOKEN` and does not need a credential committed to the repository.
+
+## Verify the checkout
+
+The repository includes dependency-free checks for Python syntax and current-tree secret hygiene:
+
+```bash
+python -m compileall -q app.py automatic_nasa_framework.py tests
+python -m unittest discover -s tests -v
+```
+
+GitHub Actions runs the same checks for every push and pull request.
+
 ## Security note
 
 NASA Earthdata credentials must be supplied at runtime through a local environment variable or another untracked secret store. Never place an access token in source code, examples, screenshots, issues, or commits.
 
 Before any future public release that enables live ingestion:
 
-1. remove committed credentials from the current tree;
-2. rotate the affected credential through the provider;
-3. decide separately whether to rewrite Git history;
-4. add tests that distinguish real ingestion from simulated fallback data; and
-5. record dataset names, timestamps, units, transformations, and failure modes.
+1. rotate any credential that was previously committed through the provider;
+2. decide separately whether to rewrite Git history;
+3. add tests that distinguish real ingestion from simulated fallback data; and
+4. record dataset names, timestamps, units, transformations, and failure modes.
 
 ## Sensible next steps
 

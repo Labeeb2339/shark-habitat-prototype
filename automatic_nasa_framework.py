@@ -16,11 +16,9 @@ class AutomaticNASAFramework:
     """Fully automatic NASA data integration with real-time download"""
     
     def __init__(self, species='great_white'):
-        # Real NASA JWT token - UPDATED
-        self.jwt_token = "eyJ0eXAiOiJKV1QiLCJvcmlnaW4iOiJFYXJ0aGRhdGEgTG9naW4iLCJzaWciOiJlZGxqd3RwdWJrZXlfb3BzIiwiYWxnIjoiUlMyNTYifQ.eyJ0eXBlIjoiVXNlciIsInVpZCI6ImxhYmVlYjIzMzkiLCJleHAiOjE3NjI3MzI3OTksImlhdCI6MTc1NzUxMTI2OSwiaXNzIjoiaHR0cHM6Ly91cnMuZWFydGhkYXRhLm5hc2EuZ292IiwiaWRlbnRpdHlfcHJvdmlkZXIiOiJlZGxfb3BzIiwiYWNyIjoiZWRsIiwiYXNzdXJhbmNlX2xldmVsIjozfQ.Sh5Iq9_16xMVE4ZU3Pbrqm1v1lGpxJIQEy_JpaAAwPKz7bN-tZy5v6OWaUabiQSrn0PFvNI08gJ3iI7NEvm47IjWWmzVwYc8cuIuM0a7kYxpLoVy8zwAlgwwefbY-YsJ0rsLfakvcvpEId_Qi5tAr24T5tSh3VkZsZzbW9HUBQI5jZvP-dr_tUuD_BIZkLgLmrDGRBfykSN4a9fKwacclNYCeRvhPsgbl4MtszR1As33rzwZziegEWjDcl6a64Z---X2BCSvUSnVekFQwQAwc9sHF12qJ4IiT1NKowXqAagp2uVMZhi_h5Mw9A7UrkumIH11-7kGNihQTFm1tsW4Hg"
-
-        print("🛰️ REAL NASA DATA ONLY MODE - NO SYNTHETIC FALLBACKS")
-        print("✅ Fresh NASA JWT token loaded")
+        # Credentials are runtime-only. Never commit an Earthdata token.
+        self.jwt_token = os.environ.get("EARTHDATA_TOKEN")
+        print("🛰️ NASA Earthdata integration initialising")
 
         self.session = requests.Session()
 
@@ -31,7 +29,9 @@ class AutomaticNASAFramework:
 
         if self.jwt_token:
             self.headers['Authorization'] = f'Bearer {self.jwt_token}'
-            print("✅ NASA authentication ready with fresh token")
+            print("✅ NASA authentication configured from EARTHDATA_TOKEN")
+        else:
+            print("⚠️ EARTHDATA_TOKEN is not set; authenticated downloads are unavailable")
         
         # NASA API endpoints
         self.nasa_apis = {
