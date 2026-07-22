@@ -5,6 +5,14 @@ variables might be combined into a shark-habitat suitability score.
 
 This repository is a **learning prototype**, not a wildlife-tracking system, validated ecological model, or research product.
 
+<p align="center">
+  <img src="assets/temperature-response.svg" width="100%" alt="Unvalidated heuristic temperature-response curves for three example shark species">
+</p>
+
+The plot is generated from the current temperature-scoring function. It shows
+how the software behaves for three example species; it is not an observation
+dataset, an ecological benchmark, or evidence that sharks occupy a location.
+
 ## What it currently demonstrates
 
 - A Streamlit interface for selecting species and study settings
@@ -47,6 +55,13 @@ python -m unittest discover -s tests -v
 
 GitHub Actions runs the same checks for every push and pull request.
 It also installs the declared runtime dependencies, starts Streamlit, and checks the health endpoint.
+
+After installing the runtime dependencies, rebuild or verify the README figure:
+
+```bash
+python tools/render_readme_assets.py
+python tools/render_readme_assets.py --check
+```
 
 ## License
 
