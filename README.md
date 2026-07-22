@@ -1,6 +1,7 @@
 # Shark Habitat Prototype
 
-An experimental Python and Streamlit project for exploring how environmental variables might be combined into a shark-habitat suitability score.
+I built this Python and Streamlit prototype to explore how environmental
+variables might be combined into a shark-habitat suitability score.
 
 This repository is a **learning prototype**, not a wildlife-tracking system, validated ecological model, or research product.
 
