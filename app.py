@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-Shark Habitat Prediction Web Application
-Interactive UI for visualizing shark habitat suitability data
-"""
+"""Interactive viewer for deterministic shark-habitat prototype scores."""
 
 import streamlit as st
 import plotly.express as px
@@ -17,7 +14,7 @@ from automatic_nasa_framework import AutomaticNASAFramework
 
 # Configure Streamlit page
 st.set_page_config(
-    page_title="🦈 Shark Habitat Predictor",
+    page_title="🦈 Shark Habitat Prototype",
     page_icon="🦈",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -381,7 +378,7 @@ def load_species_data():
     }
 
 def create_habitat_map(results, species_info):
-    """Create an interactive habitat suitability map"""
+    """Create an interactive map of the prototype score surface."""
     hsi_grid = results['hsi']
     lats = results.get('latitudes', np.linspace(32, 42, len(hsi_grid)))
     lons = results.get('longitudes', np.linspace(-125, -115, len(hsi_grid[0])))
@@ -399,40 +396,40 @@ def create_habitat_map(results, species_info):
         'Latitude': lat_flat,
         'Longitude': lon_flat,
         'HSI': hsi_flat,
-        'Quality': ['Excellent' if h > 0.8 else 'Good' if h > 0.6 else 'Moderate' if h > 0.4 else 'Poor' if h > 0.2 else 'Unsuitable' for h in hsi_flat]
+        'Score band': ['Very high' if h > 0.8 else 'High' if h > 0.6 else 'Middle' if h > 0.4 else 'Low' if h > 0.2 else 'Very low' for h in hsi_flat]
     })
     
     # Create the map
-    fig = px.scatter_mapbox(
+    fig = px.scatter_map(
         df, 
         lat="Latitude", 
         lon="Longitude", 
         color="HSI",
         size="HSI",
-        hover_data=["Quality"],
+        hover_data=["Score band"],
         color_continuous_scale="Viridis",
         size_max=15,
         zoom=6,
-        title=f"{species_info['emoji']} {species_info['name']} Habitat Suitability"
+        title=f"{species_info['emoji']} {species_info['name']} Prototype Score",
+        map_style="open-street-map",
+        height=600,
     )
     
     fig.update_layout(
-        mapbox_style="open-street-map",
-        height=600,
         title_font_size=20
     )
     
     return fig
 
 def create_hsi_distribution(results):
-    """Create HSI distribution histogram"""
+    """Create a histogram of prototype HSI values."""
     hsi_flat = np.array(results['hsi']).flatten()
     
     fig = px.histogram(
         x=hsi_flat,
         nbins=30,
-        title="Habitat Suitability Index Distribution",
-        labels={'x': 'HSI Value', 'y': 'Frequency'},
+        title="Prototype HSI Distribution",
+        labels={'x': 'Heuristic score', 'y': 'Grid cells'},
         color_discrete_sequence=['#1f77b4']
     )
     
@@ -442,7 +439,7 @@ def create_hsi_distribution(results):
     return fig
 
 def create_quality_pie_chart(results):
-    """Create habitat quality distribution pie chart"""
+    """Create a prototype score-band distribution chart."""
     hsi_flat = np.array(results['hsi']).flatten()
     
     excellent = np.sum(hsi_flat > 0.8)
@@ -451,14 +448,14 @@ def create_quality_pie_chart(results):
     poor = np.sum((hsi_flat > 0.2) & (hsi_flat <= 0.4))
     unsuitable = np.sum(hsi_flat <= 0.2)
     
-    labels = ['Excellent', 'Good', 'Moderate', 'Poor', 'Unsuitable']
+    labels = ['Very high', 'High', 'Middle', 'Low', 'Very low']
     values = [excellent, good, moderate, poor, unsuitable]
     colors = ['#2E8B57', '#32CD32', '#FFD700', '#FF8C00', '#DC143C']
     
     fig = px.pie(
         values=values,
         names=labels,
-        title="Habitat Quality Distribution",
+        title="Prototype Score Distribution",
         color_discrete_sequence=colors
     )
     
@@ -476,7 +473,7 @@ def main():
     )
     
     # Sidebar for controls
-    st.sidebar.header("🎛️ Analysis Controls")
+    st.sidebar.header("🎛️ Prototype Controls")
     
     # Species selection with better visibility
     species_data = load_species_data()
@@ -497,14 +494,14 @@ def main():
 
     # Preset locations for easy selection
     preset_locations = {
-        "🌊 California Coast (Default)": {"lat_min": 32.0, "lat_max": 42.0, "lon_min": -125.0, "lon_max": -115.0, "description": "Great White shark hotspot"},
-        "🏝️ Florida Keys": {"lat_min": 24.0, "lat_max": 26.0, "lon_min": -82.0, "lon_max": -80.0, "description": "Tiger & Bull shark habitat"},
-        "🦘 Great Barrier Reef": {"lat_min": -24.0, "lat_max": -10.0, "lon_min": 142.0, "lon_max": 154.0, "description": "Diverse shark species"},
-        "🇿🇦 South Africa Coast": {"lat_min": -35.0, "lat_max": -30.0, "lon_min": 15.0, "lon_max": 32.0, "description": "Great White aggregation sites"},
-        "🌺 Hawaiian Islands": {"lat_min": 18.0, "lat_max": 22.5, "lon_min": -161.0, "lon_max": -154.0, "description": "Tiger shark territory"},
-        "🏖️ East Coast USA": {"lat_min": 25.0, "lat_max": 45.0, "lon_min": -85.0, "lon_max": -65.0, "description": "Seasonal shark migrations"},
-        "🌴 Caribbean Sea": {"lat_min": 10.0, "lat_max": 27.0, "lon_min": -85.0, "lon_max": -60.0, "description": "Tropical shark species"},
-        "🇲🇽 Mexico Pacific": {"lat_min": 14.0, "lat_max": 32.0, "lon_min": -118.0, "lon_max": -105.0, "description": "Diverse marine ecosystems"},
+        "🌊 California Coast (Default)": {"lat_min": 32.0, "lat_max": 42.0, "lon_min": -125.0, "lon_max": -115.0, "description": "Example temperate bounding box"},
+        "🏝️ Florida Keys": {"lat_min": 24.0, "lat_max": 26.0, "lon_min": -82.0, "lon_max": -80.0, "description": "Example subtropical bounding box"},
+        "🦘 Great Barrier Reef": {"lat_min": -24.0, "lat_max": -10.0, "lon_min": 142.0, "lon_max": 154.0, "description": "Example tropical bounding box"},
+        "🇿🇦 South Africa Coast": {"lat_min": -35.0, "lat_max": -30.0, "lon_min": 15.0, "lon_max": 32.0, "description": "Example southern-coast bounding box"},
+        "🌺 Hawaiian Islands": {"lat_min": 18.0, "lat_max": 22.5, "lon_min": -161.0, "lon_max": -154.0, "description": "Example island bounding box"},
+        "🏖️ East Coast USA": {"lat_min": 25.0, "lat_max": 45.0, "lon_min": -85.0, "lon_max": -65.0, "description": "Example large coastal bounding box"},
+        "🌴 Caribbean Sea": {"lat_min": 10.0, "lat_max": 27.0, "lon_min": -85.0, "lon_max": -60.0, "description": "Example tropical-sea bounding box"},
+        "🇲🇽 Mexico Pacific": {"lat_min": 14.0, "lat_max": 32.0, "lon_min": -118.0, "lon_max": -105.0, "description": "Example Pacific bounding box"},
         "🎯 Custom Location": {"lat_min": 32.0, "lat_max": 42.0, "lon_min": -125.0, "lon_max": -115.0, "description": "Set your own coordinates"}
     }
 
@@ -573,7 +570,7 @@ def main():
         2. **GPS Coordinates**: [gps-coordinates.org](https://gps-coordinates.org/)
         3. **LatLong**: [latlong.net](https://www.latlong.net/)
 
-        **Popular Shark Locations:**
+        **Example coordinate centers:**
         - **Guadalupe Island**: 29.0°N, -118.3°W
         - **Farallon Islands**: 37.7°N, -123.0°W
         - **Seal Island, SA**: -34.1°S, 18.6°E
@@ -600,26 +597,29 @@ def main():
             'location': [selected_location.split(' ', 1)[1]]
         })
 
-        preview_fig = px.scatter_mapbox(
+        preview_fig = px.scatter_map(
             preview_df,
             lat="lat",
             lon="lon",
             hover_name="location",
             zoom=3,
             height=300,
-            mapbox_style="open-street-map"
+            map_style="open-street-map"
         )
 
-        # Add study area rectangle
-        preview_fig.add_shape(
-            type="rect",
-            x0=lon_min, y0=lat_min,
-            x1=lon_max, y1=lat_max,
-            line=dict(color="red", width=2),
-            fillcolor="rgba(255,0,0,0.1)"
+        # Add the selected geographic bounds as a line polygon.
+        preview_fig.add_trace(
+            go.Scattermap(
+                lat=[lat_min, lat_min, lat_max, lat_max, lat_min],
+                lon=[lon_min, lon_max, lon_max, lon_min, lon_min],
+                mode="lines",
+                line=dict(color="red", width=2),
+                hoverinfo="skip",
+                showlegend=False,
+            )
         )
 
-        st.sidebar.plotly_chart(preview_fig, use_container_width=True)
+        st.sidebar.plotly_chart(preview_fig, width="stretch")
     
     # Date range
     st.sidebar.subheader("📅 Time Period")
@@ -627,7 +627,7 @@ def main():
     end_date = st.sidebar.date_input("End Date", value=date(2024, 1, 31))
     
     # Analysis button
-    run_analysis = st.sidebar.button("🚀 Run Analysis", type="primary")
+    run_analysis = st.sidebar.button("🚀 Generate Prototype Score", type="primary")
     
     # Species information card
     st.sidebar.markdown("---")
@@ -646,7 +646,7 @@ def main():
     
     # Main content area
     if run_analysis:
-        with st.spinner(f"🔄 Analyzing {species_info['name']} habitat..."):
+        with st.spinner(f"🔄 Calculating the {species_info['name']} prototype score..."):
             try:
                 # Initialize NASA framework with error handling
                 st.info(f"🔄 Initializing framework for {selected_species}...")
@@ -674,9 +674,9 @@ def main():
                 date_range = [start_date.strftime('%Y-%m-%d'), end_date.strftime('%Y-%m-%d')]
 
                 # Get environmental data
-                environmental_data, real_data = framework.auto_download_nasa_data(study_area, date_range)
+                environmental_data, metadata_status = framework.auto_download_nasa_data(study_area, date_range)
 
-                # Predict habitat
+                # Calculate the unvalidated heuristic score surface.
                 results = framework.advanced_habitat_prediction(environmental_data)
                 
                 # Extract statistics from results
@@ -687,7 +687,7 @@ def main():
                 suitable_cells = stats['suitable_cells']
                 
                 # Display metrics
-                st.success("✅ Analysis Complete!")
+                st.success("✅ Prototype score complete")
                 
                 col1, col2, col3, col4 = st.columns(4)
                 with col1:
@@ -697,20 +697,20 @@ def main():
                 with col3:
                     st.metric("Min HSI", f"{min_hsi:.3f}")
                 with col4:
-                    st.metric("Suitable Cells", suitable_cells)
+                    st.metric("Cells above 0.6", suitable_cells)
                 
                 # Create tabs for different visualizations
-                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🗺️ Habitat Map", "📊 Distribution", "🥧 Quality Breakdown", "📋 Detailed Report", "🌊 Simple Summary"])
+                tab1, tab2, tab3, tab4, tab5 = st.tabs(["🗺️ Score Map", "📊 Distribution", "🥧 Score Bands", "📋 Run Report", "🌊 Plain-language Summary"])
                 
                 with tab1:
-                    st.plotly_chart(create_habitat_map(results, species_info), use_container_width=True)
+                    st.plotly_chart(create_habitat_map(results, species_info), width="stretch")
                 
                 with tab2:
                     col1, col2 = st.columns(2)
                     with col1:
-                        st.plotly_chart(create_hsi_distribution(results), use_container_width=True)
+                        st.plotly_chart(create_hsi_distribution(results), width="stretch")
                     with col2:
-                        st.plotly_chart(create_quality_pie_chart(results), use_container_width=True)
+                        st.plotly_chart(create_quality_pie_chart(results), width="stretch")
                 
                 with tab3:
                     # Quality breakdown table
@@ -718,7 +718,7 @@ def main():
                     total_points = len(hsi_flat)
                     
                     quality_data = {
-                        'Quality Level': ['Excellent (>0.8)', 'Good (0.6-0.8)', 'Moderate (0.4-0.6)', 'Poor (0.2-0.4)', 'Unsuitable (≤0.2)'],
+                        'Score band': ['Very high (>0.8)', 'High (0.6-0.8)', 'Middle (0.4-0.6)', 'Low (0.2-0.4)', 'Very low (≤0.2)'],
                         'Count': [
                             np.sum(hsi_flat > 0.8),
                             np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8)),
@@ -730,11 +730,11 @@ def main():
                     quality_data['Percentage'] = [f"{(count/total_points)*100:.1f}%" for count in quality_data['Count']]
                     
                     quality_df = pd.DataFrame(quality_data)
-                    st.dataframe(quality_df, use_container_width=True)
+                    st.dataframe(quality_df, width="stretch")
                 
                 with tab4:
                     # Generate detailed report
-                    st.subheader("📋 Detailed Analysis Report")
+                    st.subheader("📋 Prototype Run Report")
 
                     # Calculate detailed statistics
                     hsi_flat = np.array(results['hsi']).flatten()
@@ -742,7 +742,7 @@ def main():
 
                     # Generate comprehensive report
                     report = f"""
-🦈 SHARK HABITAT ANALYSIS REPORT
+🦈 SHARK HABITAT PROTOTYPE RUN REPORT
 ================================================================================
 Species: {species_info['name']} ({species_info['scientific']})
 Analysis Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
@@ -754,14 +754,14 @@ Study Area: {selected_location}
    Minimum HSI: {stats['min_hsi']:.4f}
    Standard Deviation: {stats['std_hsi']:.4f}
    Total Analysis Cells: {stats['total_cells']}
-   Suitable Habitat Cells: {stats['suitable_cells']}
+   Cells Above 0.6: {stats['suitable_cells']}
 
-🌊 HABITAT QUALITY DISTRIBUTION:
-   Excellent (>0.8): {np.sum(hsi_flat > 0.8)} cells ({np.sum(hsi_flat > 0.8)/len(hsi_flat)*100:.1f}%)
-   Good (0.6-0.8): {np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8))} cells ({np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8))/len(hsi_flat)*100:.1f}%)
-   Moderate (0.4-0.6): {np.sum((hsi_flat > 0.4) & (hsi_flat <= 0.6))} cells ({np.sum((hsi_flat > 0.4) & (hsi_flat <= 0.6))/len(hsi_flat)*100:.1f}%)
-   Poor (0.2-0.4): {np.sum((hsi_flat > 0.2) & (hsi_flat <= 0.4))} cells ({np.sum((hsi_flat > 0.2) & (hsi_flat <= 0.4))/len(hsi_flat)*100:.1f}%)
-   Unsuitable (≤0.2): {np.sum(hsi_flat <= 0.2)} cells ({np.sum(hsi_flat <= 0.2)/len(hsi_flat)*100:.1f}%)
+🌊 PROTOTYPE SCORE DISTRIBUTION:
+   Very high (>0.8): {np.sum(hsi_flat > 0.8)} cells ({np.sum(hsi_flat > 0.8)/len(hsi_flat)*100:.1f}%)
+   High (0.6-0.8): {np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8))} cells ({np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8))/len(hsi_flat)*100:.1f}%)
+   Middle (0.4-0.6): {np.sum((hsi_flat > 0.4) & (hsi_flat <= 0.6))} cells ({np.sum((hsi_flat > 0.4) & (hsi_flat <= 0.6))/len(hsi_flat)*100:.1f}%)
+   Low (0.2-0.4): {np.sum((hsi_flat > 0.2) & (hsi_flat <= 0.4))} cells ({np.sum((hsi_flat > 0.2) & (hsi_flat <= 0.4))/len(hsi_flat)*100:.1f}%)
+   Very low (≤0.2): {np.sum(hsi_flat <= 0.2)} cells ({np.sum(hsi_flat <= 0.2)/len(hsi_flat)*100:.1f}%)
 
 🔬 SPECIES CHARACTERISTICS:
    Optimal Temperature: {species_info['optimal_temp']}°C
@@ -772,8 +772,8 @@ Study Area: {selected_location}
    Migration Pattern: {species_info['migration']}
 
 🛰️ INPUT AND PROVENANCE BOUNDARY:
-   - NASA CMR metadata lookup
-   - Deterministic prototype environmental grids when direct processing is unavailable
+   - NASA CMR metadata lookup: {metadata_status['metadata_lookup']}
+   - Deterministic generated environmental grids
    - Species preference parameters collected for educational exploration
    - No tagged-animal observations or field validation
 
@@ -799,7 +799,7 @@ Generated by: Shark Habitat Suitability Explorer
 Result type: deterministic heuristic prototype
 """
 
-                    st.text_area("Detailed Analysis Report", report, height=400)
+                    st.text_area("Prototype Run Report", report, height=400)
 
                     # Download button for report
                     st.download_button(
@@ -810,294 +810,53 @@ Result type: deterministic heuristic prototype
                     )
 
                 with tab5:
-                    # User-friendly simple summary
-                    st.subheader("🌊 What Does This Mean? (Simple Explanation)")
+                    st.subheader("Interpretation")
 
-                    # Get basic stats
-                    hsi_flat = np.array(results['hsi']).flatten()
-                    mean_hsi = np.mean(hsi_flat)
-                    excellent_percent = (np.sum(hsi_flat > 0.8) / len(hsi_flat)) * 100
-                    good_percent = (np.sum((hsi_flat > 0.6) & (hsi_flat <= 0.8)) / len(hsi_flat)) * 100
-
-                    # Overall assessment
+                    hsi_flat = np.asarray(results["hsi"]).ravel()
+                    mean_hsi = float(np.mean(hsi_flat))
                     if mean_hsi > 0.7:
-                        overall_rating = "🟢 **EXCELLENT**"
-                        overall_message = f"This is a fantastic area for {species_info['name']}! The conditions are nearly perfect."
+                        score_band = "Very high"
                     elif mean_hsi > 0.5:
-                        overall_rating = "🟡 **GOOD**"
-                        overall_message = f"This is a good area for {species_info['name']}. You'd likely find them here regularly."
+                        score_band = "High"
                     elif mean_hsi > 0.3:
-                        overall_rating = "🟠 **MODERATE**"
-                        overall_message = f"This area is okay for {species_info['name']}. They might visit occasionally."
+                        score_band = "Middle"
                     else:
-                        overall_rating = "🔴 **POOR**"
-                        overall_message = f"This area is not ideal for {species_info['name']}. They would rarely be found here."
+                        score_band = "Low"
 
-                    # Display simple summary
-                    st.markdown(f"""
-                    ### 🎯 **Overall Habitat Rating: {overall_rating}**
+                    st.markdown(
+                        f"The current heuristic assigns a **{score_band.lower()}** "
+                        f"mean score (`{mean_hsi:.3f}`) to this generated grid. "
+                        "This is software output, not evidence of animal presence."
+                    )
 
-                    {overall_message}
-
-                    ---
-
-                    ### 📊 **Quick Stats:**
-                    - **🏆 Excellent Habitat**: {excellent_percent:.1f}% of the area
-                    - **✅ Good Habitat**: {good_percent:.1f}% of the area
-                    - **📍 Best Spots**: {np.sum(hsi_flat > 0.6)} locations found
-
-                    ### 🦈 **What This Shark Likes:**
-                    """)
-
-                    # Species-specific preferences in simple language
-                    species_key = selected_species
-                    if species_key == 'great_white':
-                        st.markdown("""
-                        - 🌡️ **Cool water** (like California coast in fall)
-                        - 🦭 **Areas with seals** (their favorite food!)
-                        - 🌊 **Temperature boundaries** where different waters meet
-                        - 🏔️ **Not too deep** - they hunt near the surface
-                        """)
-                    elif species_key == 'tiger_shark':
-                        st.markdown("""
-                        - 🌴 **Warm tropical water** (like Hawaii year-round)
-                        - 🐢 **Everything is food** - they eat almost anything!
-                        - 🏝️ **Near islands and reefs**
-                        - 🌙 **More active at night**
-                        """)
-                    elif species_key == 'bull_shark':
-                        st.markdown("""
-                        - 🔥 **Very warm water** (like Florida in summer)
-                        - 🏞️ **Shallow areas** - they love river mouths!
-                        - 🌊 **Can handle fresh water** (unique among sharks)
-                        - 🦐 **Lots of small fish and rays** to eat
-                        """)
-                    elif species_key == 'hammerhead':
-                        st.markdown("""
-                        - 🌺 **Tropical warm water** (like Bahamas in winter)
-                        - 🗂️ **Sandy bottoms** where rays hide
-                        - 🔨 **Uses unique head shape** to hunt rays
-                        - 👥 **Often found in groups** (schooling behavior)
-                        """)
-                    elif species_key == 'mako':
-                        st.markdown("""
-                        - 🌊 **Open ocean** (far from shore)
-                        - ⚡ **Fast-moving water** with currents
-                        - 🐟 **Big fast fish** like tuna (they're speed hunters!)
-                        - 🌡️ **Moderate temperatures** (not too hot or cold)
-                        """)
-                    elif species_key == 'blue_shark':
-                        st.markdown("""
-                        - ❄️ **Cool water** (like North Atlantic)
-                        - 🌊 **Deep open ocean** (they travel huge distances)
-                        - 🦑 **Squid and small fish** (not picky eaters)
-                        - 🧭 **Follow ocean currents** like highways
-                        """)
-                    elif species_key == 'whale_shark':
-                        st.markdown("""
-                        - 🌴 **Warm tropical water** (like Maldives)
-                        - 🦐 **Plankton and small fish** (gentle giant!)
-                        - 🌊 **Surface waters** where plankton blooms
-                        - 📏 **Largest fish in the ocean** (up to 40 feet!)
-                        """)
-                    elif species_key == 'basking_shark':
-                        st.markdown("""
-                        - ❄️ **Cool temperate water** (like Scotland)
-                        - 🦐 **Zooplankton** (filter feeder like whales)
-                        - 🌊 **Surface waters** following food blooms
-                        - 🚗 **Second largest fish** (up to 26 feet!)
-                        """)
-                    elif species_key == 'thresher_shark':
-                        st.markdown("""
-                        - 🌊 **Temperate open ocean** (moderate temperatures)
-                        - 🐟 **Schooling fish** like sardines and anchovies
-                        - 🎯 **Uses long tail** to stun prey (unique hunting!)
-                        - 🏊 **Deep diving** capability (up to 500m)
-                        """)
-                    elif species_key == 'nurse_shark':
-                        st.markdown("""
-                        - 🏝️ **Warm shallow reefs** (like Caribbean)
-                        - 🦀 **Bottom creatures** like crabs and small fish
-                        - 😴 **Very docile** (safe to swim near)
-                        - 🏠 **Stays close to reefs** (not migratory)
-                        """)
-                    elif species_key == 'reef_shark':
-                        st.markdown("""
-                        - 🏝️ **Coral reefs** (tropical paradise waters)
-                        - 🐠 **Reef fish and rays** (reef ecosystem predator)
-                        - 🏠 **Territorial** around specific reefs
-                        - 🤿 **Popular with divers** (beautiful to observe)
-                        """)
-                    elif species_key == 'lemon_shark':
-                        st.markdown("""
-                        - 🌴 **Warm mangrove areas** (like Bahamas)
-                        - 🐟 **Bonefish and rays** (shallow water prey)
-                        - 🌱 **Uses mangroves** as nurseries for babies
-                        - 🟡 **Yellow coloration** (perfect camouflage)
-                        """)
-                    elif species_key == 'blacktip_shark':
-                        st.markdown("""
-                        - 🏖️ **Shallow coastal waters** (near beaches)
-                        - 🐟 **Schooling fish** (sardines, herrings)
-                        - 🦘 **Famous for jumping** out of the water
-                        - ⚫ **Black-tipped fins** (easy to identify)
-                        """)
-                    elif species_key == 'sandbar_shark':
-                        st.markdown("""
-                        - 🏖️ **Continental shelf** (moderate depths)
-                        - 🐟 **Bottom fish and rays** (seafloor hunters)
-                        - 🗺️ **Long migrations** along coastlines
-                        - 📏 **Large and robust** (up to 8 feet)
-                        """)
-                    elif species_key == 'spinner_shark':
-                        st.markdown("""
-                        - 🌴 **Warm coastal waters** (tropical/subtropical)
-                        - 🐟 **Schooling fish** (sardines, herrings)
-                        - 🌀 **Spinning attacks** (leaps and spins!)
-                        - 🏊 **Fast swimmer** (high-energy hunter)
-                        """)
-                    elif species_key == 'dusky_shark':
-                        st.markdown("""
-                        - 🌊 **Temperate coastal waters** (wide range)
-                        - 🐟 **Large fish** (bluefish, tuna)
-                        - 🗺️ **Epic migrations** (thousands of miles)
-                        - 📏 **Large size** (up to 12 feet)
-                        """)
-                    elif species_key == 'silky_shark':
-                        st.markdown("""
-                        - 🌴 **Tropical open ocean** (far from shore)
-                        - 🐟 **Tuna and squid** (pelagic prey)
-                        - ✨ **Silky smooth skin** (very distinctive)
-                        - 🌊 **Deep diving** (follows prey vertically)
-                        """)
-                    elif species_key == 'porbeagle_shark':
-                        st.markdown("""
-                        - ❄️ **Cold northern waters** (like North Atlantic)
-                        - 🐟 **Mackerel and herring** (cold water fish)
-                        - 🔥 **Warm-blooded** (endothermic like tuna)
-                        - ⚡ **Very fast swimmer** (built for speed)
-                        """)
-                    elif species_key == 'longfin_mako':
-                        st.markdown("""
-                        - 🌴 **Tropical open ocean** (warmer than shortfin mako)
-                        - 🐟 **Large fish** like tuna and billfish
-                        - 🔥 **Warm-blooded** (endothermic predator)
-                        - 🌊 **Deep diving** (up to 220m)
-                        """)
-                    elif species_key == 'salmon_shark':
-                        st.markdown("""
-                        - 🧊 **Cold North Pacific** (Alaska to California)
-                        - 🐟 **Salmon and herring** (follows salmon runs)
-                        - 🔥 **Warm-blooded** (like great white)
-                        - 🏃 **Fast swimmer** (built for pursuit)
-                        """)
-                    elif species_key == 'sand_tiger':
-                        st.markdown("""
-                        - 🏖️ **Temperate coastal waters** (near shore)
-                        - 🐟 **Bottom fish and rays** (ambush hunter)
-                        - 😮 **Gulps air** (for buoyancy control)
-                        - 🦷 **Scary teeth** (but relatively docile)
-                        """)
-                    elif species_key == 'scalloped_hammerhead':
-                        st.markdown("""
-                        - 🌴 **Tropical coastal waters** (warm seas)
-                        - 🐟 **Schooling fish and squid** (group hunter)
-                        - 👥 **Forms large schools** (hundreds together!)
-                        - 🔨 **Scalloped head** (distinctive shape)
-                        """)
-                    elif species_key == 'smooth_hammerhead':
-                        st.markdown("""
-                        - 🌊 **Temperate coastal waters** (cooler than scalloped)
-                        - 🐟 **Sardines and anchovies** (schooling fish)
-                        - 🔨 **Smooth head edge** (no scallops)
-                        - 🏊 **Strong swimmer** (long migrations)
-                        """)
-                    elif species_key == 'bonnethead_shark':
-                        st.markdown("""
-                        - 🏖️ **Shallow warm waters** (like Florida)
-                        - 🦀 **Crabs and shrimp** (bottom feeder)
-                        - 🌱 **Eats seagrass** (only omnivorous shark!)
-                        - 👒 **Bonnet-shaped head** (smallest hammerhead)
-                        """)
-                    else:
-                        # Fallback for any missing species
-                        st.markdown(f"""
-                        - 🌡️ **Temperature**: {species_info.get('temp_range', 'Variable')}
-                        - 🏔️ **Depth**: {species_info.get('depth_range', 'Variable')}
-                        - 🍽️ **Hunting**: {species_info.get('hunting', 'Species-specific')}
-                        - 🏠 **Habitat**: {species_info.get('habitat', 'Various environments')}
-                        """)
+                    st.subheader("Profile parameters used")
+                    profile_rows = [
+                        {"Parameter": "Temperature range", "Value": species_info["temp_range"]},
+                        {"Parameter": "Depth range", "Value": species_info["depth_range"]},
+                        {"Parameter": "Habitat label", "Value": species_info["habitat"]},
+                        {"Parameter": "Hunting label", "Value": species_info["hunting"]},
+                        {"Parameter": "Migration label", "Value": species_info["migration"]},
+                    ]
+                    st.dataframe(pd.DataFrame(profile_rows), width="stretch", hide_index=True)
+                    st.caption(
+                        "These profile values are illustrative fixtures implemented in code. "
+                        "They are not a reviewed ecological dataset."
+                    )
 
                     st.markdown("""
-                    ---
+                    **Useful for**
 
-                    ### 🤔 **What is this prototype useful for?**
+                    - Inspecting a multi-factor heuristic
+                    - Comparing deterministic outputs across configurations
+                    - Practising tests, visualization, and provenance labelling
 
-                    **🎓 If you're a student:**
-                    - Inspect how a multi-factor heuristic is implemented
-                    - Compare deterministic outputs across configurations
-                    - Practice testing, visualization, and provenance labelling
+                    **Do not use for**
 
-                    **🚫 Do not use it for:**
                     - Predicting where sharks are present
                     - Planning ocean activities or safety decisions
                     - Scientific, conservation, or policy evidence
                     """)
 
-                    # Fun facts section
-                    st.markdown("### 🎉 **Fun Shark Facts:**")
-
-                    if species_key == 'great_white':
-                        st.info("🦈 Great Whites can detect a single drop of blood in 25 gallons of water!")
-                    elif species_key == 'tiger_shark':
-                        st.info("🐅 Tiger Sharks are called the 'wastebasket of the sea' because they eat almost anything!")
-                    elif species_key == 'bull_shark':
-                        st.info("🏞️ Bull Sharks can swim up rivers and have been found 2,500 miles up the Amazon!")
-                    elif species_key == 'hammerhead':
-                        st.info("🔨 Hammerhead's weird head shape gives them 360-degree vision!")
-                    elif species_key == 'mako':
-                        st.info("⚡ Mako Sharks can swim up to 45 mph - faster than most boats!")
-                    elif species_key == 'blue_shark':
-                        st.info("🌍 Blue Sharks migrate up to 5,500 miles - that's like swimming across the Atlantic!")
-                    elif species_key == 'whale_shark':
-                        st.info("🐋 Whale Sharks are the largest fish in the ocean but only eat tiny plankton!")
-                    elif species_key == 'basking_shark':
-                        st.info("🦈 Basking Sharks can filter 2,000 tons of water per hour through their gills!")
-                    elif species_key == 'thresher_shark':
-                        st.info("🎯 Thresher Sharks use their tail like a whip to stun entire schools of fish!")
-                    elif species_key == 'nurse_shark':
-                        st.info("😴 Nurse Sharks are so docile you can literally pet them (but don't try this at home)!")
-                    elif species_key == 'reef_shark':
-                        st.info("🏝️ Caribbean Reef Sharks are like the neighborhood watch of coral reefs!")
-                    elif species_key == 'lemon_shark':
-                        st.info("🍋 Lemon Sharks return to the exact same mangrove where they were born to have babies!")
-                    elif species_key == 'blacktip_shark':
-                        st.info("🦘 Blacktip Sharks can jump 6 feet out of the water while hunting!")
-                    elif species_key == 'sandbar_shark':
-                        st.info("🗺️ Sandbar Sharks migrate over 2,000 miles along the US East Coast every year!")
-                    elif species_key == 'spinner_shark':
-                        st.info("🌀 Spinner Sharks can spin up to 3 times in the air during their attacks!")
-                    elif species_key == 'dusky_shark':
-                        st.info("📏 Dusky Sharks can live over 40 years and don't have babies until they're 20!")
-                    elif species_key == 'silky_shark':
-                        st.info("✨ Silky Sharks have the smoothest skin of any shark - like touching silk!")
-                    elif species_key == 'porbeagle_shark':
-                        st.info("🔥 Porbeagle Sharks are warm-blooded and can heat their bodies 20°F above water temperature!")
-                    elif species_key == 'longfin_mako':
-                        st.info("🌊 Longfin Makos have the longest pectoral fins of any mako shark - perfect for deep ocean gliding!")
-                    elif species_key == 'salmon_shark':
-                        st.info("🐟 Salmon Sharks can eat up to 25% of their body weight in salmon during feeding season!")
-                    elif species_key == 'sand_tiger':
-                        st.info("😮 Sand Tiger Sharks gulp air at the surface to control their buoyancy - like a built-in life jacket!")
-                    elif species_key == 'scalloped_hammerhead':
-                        st.info("👥 Scalloped Hammerheads form the largest shark schools on Earth - sometimes over 500 sharks together!")
-                    elif species_key == 'smooth_hammerhead':
-                        st.info("🔨 Smooth Hammerheads can migrate over 4,000 miles - one of the longest shark migrations recorded!")
-                    elif species_key == 'bonnethead_shark':
-                        st.info("🌱 Bonnethead Sharks are the only omnivorous sharks - they actually digest seagrass for nutrients!")
-                    else:
-                        st.info("🦈 Sharks have been around for over 400 million years - they're older than trees!")
-                
             except Exception as e:
                 st.error(f"❌ Analysis failed: {str(e)}")
                 st.error(f"🔍 Error details: {type(e).__name__}")
@@ -1119,7 +878,7 @@ Result type: deterministic heuristic prototype
                 st.info("💡 Tips:")
                 st.info("- Make sure all dependencies are installed")
                 st.info("- Try a smaller study area")
-                st.info("- Check your internet connection for NASA data access")
+                st.info("- Check your internet connection for the optional NASA CMR metadata lookup")
                 st.info("- Try a different species")
     
     else:
@@ -1145,15 +904,17 @@ Result type: deterministic heuristic prototype
         2. **📍 Choose a study location** from preset options (California, Florida, Australia, etc.)
         3. **🔧 Optionally modify coordinates** for custom areas
         4. **📅 Set your time period** for analysis
-        5. **🚀 Click "Run Analysis"** to generate habitat predictions
+        5. **🚀 Generate a prototype score surface**
 
-        ### 🌍 Popular Study Locations:
-        - **🌊 California Coast**: Great White shark hotspot
-        - **🏝️ Florida Keys**: Tiger & Bull shark habitat
-        - **🦘 Great Barrier Reef**: Diverse shark species
-        - **🇿🇦 South Africa**: Great White aggregation sites
-        - **🌺 Hawaiian Islands**: Tiger shark territory
-        - **🎯 Custom Location**: Set your own coordinates anywhere!
+        ### 🌍 Example bounding boxes:
+        - California Coast
+        - Florida Keys
+        - Great Barrier Reef
+        - South Africa Coast
+        - Hawaiian Islands
+        - A custom coordinate range
+
+        Presets are interface examples, not confirmed shark locations.
         
         ### 🔬 Scoring inputs:
         The heuristic includes:

@@ -38,7 +38,7 @@ class AutomaticNASAFramework:
 
         # Credentials are runtime-only. Never commit an Earthdata token.
         self.jwt_token = os.environ.get("EARTHDATA_TOKEN")
-        print("🛰️ NASA Earthdata integration initialising")
+        print("🛰️ Shark habitat prototype initialising")
 
         self.session = requests.Session()
 
@@ -49,9 +49,9 @@ class AutomaticNASAFramework:
 
         if self.jwt_token:
             self.headers['Authorization'] = f'Bearer {self.jwt_token}'
-            print("✅ NASA authentication configured from EARTHDATA_TOKEN")
+            print("✅ Earthdata token configured for optional request experiments")
         else:
-            print("⚠️ EARTHDATA_TOKEN is not set; authenticated downloads are unavailable")
+            print("ℹ️ EARTHDATA_TOKEN is not set; generated prototype mode is available")
         
         # NASA API endpoints
         self.nasa_apis = {
@@ -69,7 +69,8 @@ class AutomaticNASAFramework:
             'viirs_chl_monthly': 'C1200035554-OB_DAAC'
         }
         
-        # Multi-species shark parameters (literature-based)
+        # Illustrative multi-species parameters for software experiments. They
+        # are not a reviewed ecological dataset and do not establish presence.
         self.shark_species_params = {
             'great_white': {
                 'name': 'Great White Shark',
@@ -622,7 +623,7 @@ class AutomaticNASAFramework:
         # Merge additional species into main dictionary
         self.shark_species_params.update(additional_species)
 
-        # Set species with validation
+        # Select a known prototype profile.
         if species in self.shark_species_params:
             self.current_species = species
             self.shark_params = self.shark_species_params[self.current_species]
@@ -642,8 +643,7 @@ class AutomaticNASAFramework:
         self.human_impacts = self._initialize_human_impact_models()
         self.temporal_factors = self._initialize_temporal_factors()
 
-        # Initialize validation systems
-        self.telemetry_validator = self._initialize_telemetry_validator()
+        # Initialize additional heuristic components.
         self.ocean_dynamics = self._initialize_ocean_dynamics()
         self.water_quality = self._initialize_water_quality()
         self.weather_effects = self._initialize_weather_effects()
@@ -676,11 +676,11 @@ class AutomaticNASAFramework:
 
 
     def _authenticate_nasa(self):
-        """Authenticate with NASA Earthdata using JWT token"""
+        """Configure authentication for experimental Earthdata requests."""
         print("🔐 AUTHENTICATING WITH NASA EARTHDATA...")
 
         if self.jwt_token:
-            print("   ✅ Using NASA JWT token for real data access")
+            print("   ✅ Earthdata token configured for authenticated requests")
             self.authenticated = True
             return True
         else:
@@ -690,7 +690,7 @@ class AutomaticNASAFramework:
             return False
 
     def explain_species_differentiation(self):
-        """Explain how species are differentiated scientifically"""
+        """Explain how the prototype's species profiles differ."""
         print("\n🔬 SPECIES DIFFERENTIATION METHODOLOGY")
         print("=" * 60)
 
@@ -828,46 +828,6 @@ class AutomaticNASAFramework:
                 'breeding_season': {'habitat_shift': 0.8, 'feeding_reduction': 0.7},
                 'pupping_season': {'shallow_preference': 1.5, 'territorial_behavior': 1.3},
                 'migration_season': {'movement_increase': 2.0, 'feeding_opportunistic': 1.1}
-            }
-        }
-
-    def _initialize_telemetry_validator(self):
-        """Initialize telemetry validation system"""
-        return {
-            'satellite_tags': {
-                'great_white': {
-                    'tag_locations': [
-                        {'lat': 37.7, 'lon': -122.5, 'date': '2024-01-15', 'depth': 10, 'temp': 14.2},
-                        {'lat': 36.8, 'lon': -121.9, 'date': '2024-01-16', 'depth': 25, 'temp': 13.8},
-                        {'lat': 35.9, 'lon': -121.3, 'date': '2024-01-17', 'depth': 15, 'temp': 14.5}
-                    ],
-                    'accuracy_radius': 2.5,  # km
-                    'temporal_resolution': 6  # hours
-                },
-                'tiger_shark': {
-                    'tag_locations': [
-                        {'lat': 25.8, 'lon': -80.2, 'date': '2024-01-15', 'depth': 30, 'temp': 24.1},
-                        {'lat': 25.9, 'lon': -80.1, 'date': '2024-01-16', 'depth': 45, 'temp': 23.8}
-                    ],
-                    'accuracy_radius': 3.0,
-                    'temporal_resolution': 8
-                }
-            },
-            'acoustic_detections': {
-                'receiver_arrays': [
-                    {'lat': 37.7, 'lon': -122.5, 'detection_range': 0.8, 'species': ['great_white']},
-                    {'lat': 25.8, 'lon': -80.2, 'detection_range': 0.6, 'species': ['tiger_shark', 'bull_shark']}
-                ],
-                'detection_probability': 0.85
-            },
-            'fisheries_cpue': {
-                'commercial_longline': {
-                    'great_white': {'cpue': 0.12, 'effort_hours': 1200, 'location': [37.5, -122.0]},
-                    'mako': {'cpue': 0.08, 'effort_hours': 800, 'location': [36.0, -121.5]}
-                },
-                'recreational': {
-                    'tiger_shark': {'cpue': 0.05, 'effort_hours': 400, 'location': [25.5, -80.0]}
-                }
             }
         }
 
@@ -1015,18 +975,40 @@ class AutomaticNASAFramework:
             }
         }
 
-    def auto_download_nasa_data(self, study_area, date_range):
-        """Query NASA metadata and prepare explicitly labelled prototype grids."""
+    def auto_download_nasa_data(self, study_area, date_range, *, lookup_metadata=False):
+        """Prepare prototype grids, optionally adding a NASA CMR catalog lookup.
 
-        print("🛰️ NASA METADATA LOOKUP AND PROTOTYPE GRID PREPARATION")
+        The historical method name is retained for compatibility. The default
+        path is fully local and generated; setting ``lookup_metadata=True``
+        queries catalog metadata but still does not turn the grids into
+        satellite measurements.
+        """
+
+        print("🛰️ PROTOTYPE GRID PREPARATION")
         print("=" * 50)
         print(f"📍 Study Area: {study_area['name']}")
         print(f"📅 Date Range: {date_range[0]} to {date_range[1]}")
 
-        if self.jwt_token:
-            print("🔑 Using EARTHDATA_TOKEN for authenticated requests")
-        else:
-            print("ℹ️ Continuing without authenticated Earthdata access")
+        if lookup_metadata:
+            if self.jwt_token:
+                print("🔑 Using EARTHDATA_TOKEN for authenticated requests")
+            else:
+                print("ℹ️ Continuing without authenticated Earthdata access")
+
+        if not lookup_metadata:
+            metadata_status = {
+                'metadata_lookup': 'skipped',
+                'evidence_boundary': (
+                    'Environmental grids are deterministic generated inputs, '
+                    'not satellite measurements.'
+                ),
+            }
+            print("ℹ️ NASA CMR metadata lookup skipped (default prototype mode)")
+            bathymetry_data = self._prepare_prototype_bathymetry_data(study_area)
+            environmental_data = self._build_prototype_environmental_data(
+                study_area, bathymetry_data
+            )
+            return environmental_data, metadata_status
 
         # Search for available data
         bbox = f"{study_area['bounds'][0]},{study_area['bounds'][1]},{study_area['bounds'][2]},{study_area['bounds'][3]}"
@@ -1111,15 +1093,17 @@ class AutomaticNASAFramework:
             print("⚠️ NASA Chlorophyll data not available - will use SST-based productivity estimates")
 
         print(f"\n🌊 Preparing bathymetry input...")
-        bathymetry_data = self._download_real_bathymetry_data(study_area)
+        bathymetry_data = self._prepare_prototype_bathymetry_data(study_area)
 
         print(f"\n📊 Preparing environmental prototype grids...")
-        environmental_data = self._process_real_nasa_data(study_area, real_data, bathymetry_data)
+        environmental_data = self._build_prototype_environmental_data(
+            study_area, bathymetry_data
+        )
 
         return environmental_data, real_data
 
     def _process_sst_granules(self, granules, bounds, grid_size):
-        """Generate a deterministic SST demo grid after a metadata match."""
+        """Generate a deterministic SST demo grid."""
         try:
             # For now, create a realistic grid based on granule metadata
             # In a full implementation, you would download and process the actual NetCDF files
@@ -1259,8 +1243,8 @@ class AutomaticNASAFramework:
             print(f"      ❌ Error estimating productivity: {e}")
             return None
 
-    def _download_real_sst_grid(self, bounds, grid_size):
-        """Download real NASA MODIS SST data"""
+    def _experimental_sst_grid(self, bounds, grid_size):
+        """Attempt an experimental MODIS SST extraction, with demo fallback."""
         print("      🔄 Downloading NASA MODIS Aqua SST data...")
 
         try:
@@ -1465,9 +1449,9 @@ class AutomaticNASAFramework:
                 'data': data_array,
                 'latitude': subset_lats,
                 'longitude': subset_lons,
-                'source': 'NASA NetCDF',
+                'source': 'Experimental NASA NetCDF extraction',
                 'processing_level': 'L3 NetCDF',
-                'data_type': 'REAL NASA NETCDF DATA',
+                'data_type': 'UNVALIDATED NASA NETCDF EXTRACT',
                 'quality_controlled': quality_var is not None
             }
 
@@ -1610,8 +1594,8 @@ class AutomaticNASAFramework:
             print(f"         ❌ NetCDF to grid conversion error: {e}")
             return None
 
-    def _download_real_chl_grid(self, bounds, grid_size):
-        """Download real NASA MODIS Chlorophyll data"""
+    def _experimental_chlorophyll_grid(self, bounds, grid_size):
+        """Attempt an experimental MODIS chlorophyll extraction."""
         print("      🔄 Downloading NASA MODIS Aqua Chlorophyll data...")
 
         try:
@@ -1669,42 +1653,12 @@ class AutomaticNASAFramework:
             print(f"      ❌ Chlorophyll download error: {e}")
             return None
 
-    def _download_real_bathymetry_data(self, study_area):
-        """Download real NASA/NOAA bathymetry data"""
-        print("      🔄 Downloading real GEBCO/ETOPO bathymetry data...")
+    def _prepare_prototype_bathymetry_data(self, study_area):
+        """Prepare an unvalidated prototype bathymetry layer."""
+        print("      🔄 Generating deterministic prototype bathymetry...")
+        return self._process_bathymetry_response(None, study_area['bounds'])
 
-        try:
-            # Use NOAA ETOPO bathymetry service
-            bounds = study_area['bounds']
-
-            # NOAA ETOPO API
-            params = {
-                'north': bounds[3],
-                'south': bounds[1],
-                'east': bounds[2],
-                'west': bounds[0],
-                'format': 'json',
-                'resolution': '1'  # 1 arc-minute resolution
-            }
-
-            response = requests.get(
-                'https://gis.ngdc.noaa.gov/arcgis/rest/services/DEM_mosaics/ETOPO1_bedrock/ImageServer/exportImage',
-                params=params,
-                timeout=30
-            )
-
-            if response.status_code == 200:
-                print("      ✅ Real bathymetry data downloaded")
-                return self._process_bathymetry_response(response, bounds)
-            else:
-                print(f"      ❌ Bathymetry download failed: HTTP {response.status_code}")
-                return None
-
-        except Exception as e:
-            print(f"      ❌ Bathymetry download error: {e}")
-            return None
-
-    def _process_real_nasa_data(self, study_area, real_data_info, bathymetry_data):
+    def _build_prototype_environmental_data(self, study_area, bathymetry_data):
         """Build prototype environmental layers from available inputs."""
         
         bounds = study_area['bounds']  # [west, south, east, north]
@@ -1714,40 +1668,31 @@ class AutomaticNASAFramework:
         lats = np.linspace(bounds[1], bounds[3], grid_size)
         lons = np.linspace(bounds[0], bounds[2], grid_size)
         
-        # Attempt direct processing; otherwise the helper creates a labelled demo grid.
-        print("   🌡️ Preparing SST input...")
-        sst_data = self._download_real_sst_grid(bounds, grid_size)
-        if sst_data is None:
-            print("   ❌ FAILED: Could not prepare an SST input")
-            return None
-        
-        # Prepare chlorophyll input (optional).
-        print("   🌱 Preparing chlorophyll input...")
-        chl_data = self._download_real_chl_grid(bounds, grid_size)
-        if chl_data is None:
-            print("   ⚠️ NASA Chlorophyll data not available - generating productivity estimates from SST")
-            chl_data = self._estimate_productivity_from_sst(sst_data, bounds, grid_size)
+        print("   🌡️ Generating deterministic SST prototype input...")
+        sst_data = self._process_sst_granules([], bounds, grid_size)
 
-        # Labels stay conservative because metadata fallbacks generate demo grids.
+        print("   🌱 Generating deterministic chlorophyll prototype input...")
+        chl_data = self._process_chl_granules([], bounds, grid_size)
+
         return {
             'sst': {
                 'data': sst_data,
                 'latitudes': lats.tolist(),
                 'longitudes': lons.tolist(),
-                'source': 'NASA CMR metadata with prototype grid processing',
+                'source': 'Deterministic generated prototype',
                 'accuracy': 'Not validated',
                 'resolution': f'{grid_size}x{grid_size} demo grid',
-                'algorithm': 'Prototype SST processing path',
+                'algorithm': 'Latitude trend with seeded demo variation',
                 'data_type': 'PROTOTYPE ENVIRONMENTAL GRID'
             },
             'chlorophyll': {
                 'data': chl_data,
                 'latitudes': lats.tolist(),
                 'longitudes': lons.tolist(),
-                'source': 'NASA CMR metadata with prototype grid processing',
+                'source': 'Deterministic generated prototype',
                 'accuracy': 'Not validated',
                 'resolution': f'{grid_size}x{grid_size} demo grid',
-                'algorithm': 'Prototype chlorophyll processing path',
+                'algorithm': 'Coastal-distance heuristic with seeded demo variation',
                 'data_type': 'PROTOTYPE ENVIRONMENTAL GRID'
             },
             'bathymetry': {
@@ -1892,7 +1837,7 @@ class AutomaticNASAFramework:
                 human_impact = self._calculate_human_impacts(i, j)
                 temporal_effects = self._calculate_temporal_effects()
 
-                # 6. 10/10 ACCURACY FACTORS
+                # 6. Additional prototype response factors
                 # Calculate coordinates (simplified grid mapping)
                 lat = 32 + (i / grid_shape[0]) * 10  # 32-42°N
                 lon = -125 + (j / grid_shape[1]) * 10  # -125 to -115°W
@@ -1938,7 +1883,7 @@ class AutomaticNASAFramework:
                                        (1 - human_impact) * 0.2 +
                                        temporal_effects * 0.1)
 
-                # Apply 10/10 accuracy factors
+                # Combine the additional heuristic response factors.
                 ocean_dynamics_multiplier = (current_effects * 0.4 +
                                            upwelling_effects * 0.3 +
                                            eddy_effects * 0.3)
@@ -1951,7 +1896,7 @@ class AutomaticNASAFramework:
                 weather_multiplier = (storm_effects * 0.6 +
                                     wind_mixing_effects * 0.4)
 
-                # FINAL 10/10 HSI CALCULATION
+                # Final heuristic suitability calculation.
                 hsi = (base_hsi *
                       synergy_multiplier *
                       ecological_multiplier *
@@ -2298,7 +2243,7 @@ class AutomaticNASAFramework:
             # Can dive to find better temperatures
             synergy = thermoregulation_ability * (1 - temp_suit) * depth_suit * 0.2
         elif temp_suit > 0.8 and depth_suit > 0.8:
-            # Optimal temperature + optimal depth = perfect conditions
+            # Preferred temperature and depth yield the strongest heuristic interaction.
             synergy = 0.15 * temp_suit * depth_suit
         else:
             synergy = 0.0
@@ -3048,112 +2993,6 @@ class AutomaticNASAFramework:
 
         return analysis
 
-    def validate_with_telemetry(self, predictions, validation_type='satellite_tags'):
-        """Validate predictions against real telemetry data - 10/10 ACCURACY FEATURE"""
-        print("\n🔬 TELEMETRY VALIDATION")
-        print("=" * 50)
-
-        telemetry_data = self.telemetry_validator[validation_type]
-        species_data = telemetry_data.get(self.current_species, {})
-
-        if not species_data:
-            print(f"⚠️ No telemetry data available for {self.current_species}")
-            return {'validation_score': 0.0, 'message': 'No validation data'}
-
-        validation_results = {
-            'total_points': 0,
-            'correct_predictions': 0,
-            'spatial_errors': [],
-            'validation_score': 0.0
-        }
-
-        if validation_type == 'satellite_tags':
-            tag_locations = species_data['tag_locations']
-            accuracy_radius = species_data['accuracy_radius']
-
-            for tag_point in tag_locations:
-                lat, lon = tag_point['lat'], tag_point['lon']
-
-                # Find nearest prediction point
-                lat_idx = int((lat - 32) / 10 * 25)  # Simplified grid mapping
-                lon_idx = int((lon + 125) / 10 * 25)
-
-                if 0 <= lat_idx < 25 and 0 <= lon_idx < 25:
-                    predicted_hsi = predictions['hsi'][lat_idx][lon_idx]
-
-                    # High HSI should correspond to shark presence
-                    if predicted_hsi > 0.6:  # Good habitat prediction
-                        validation_results['correct_predictions'] += 1
-
-                    # Calculate spatial error (simplified)
-                    spatial_error = accuracy_radius * self.rng.uniform(0.5, 1.5)
-                    validation_results['spatial_errors'].append(spatial_error)
-
-                validation_results['total_points'] += 1
-
-        # Calculate validation metrics
-        if validation_results['total_points'] > 0:
-            accuracy = validation_results['correct_predictions'] / validation_results['total_points']
-            mean_spatial_error = np.mean(validation_results['spatial_errors']) if validation_results['spatial_errors'] else 0
-
-            # Overall validation score (0-1)
-            validation_score = accuracy * (1 - min(mean_spatial_error / 10, 0.5))
-            validation_results['validation_score'] = validation_score
-
-            print(f"📊 Validation Results:")
-            print(f"   Accuracy: {accuracy:.2%}")
-            print(f"   Mean Spatial Error: {mean_spatial_error:.1f} km")
-            print(f"   Overall Validation Score: {validation_score:.3f}")
-
-        return validation_results
-
-    def cross_validate_model(self, study_area, date_range, k_folds=5):
-        """Perform k-fold cross-validation - 10/10 ACCURACY FEATURE"""
-        print("\n🔄 CROSS-VALIDATION ANALYSIS")
-        print("=" * 50)
-
-        validation_scores = []
-
-        for fold in range(k_folds):
-            print(f"📋 Fold {fold + 1}/{k_folds}")
-
-            # Get environmental data (simplified - would split real data)
-            environmental_data, _ = self.auto_download_nasa_data(study_area, date_range)
-
-            # Predict habitat
-            predictions = self.advanced_habitat_prediction(environmental_data)
-
-            # Validate against telemetry
-            validation_result = self.validate_with_telemetry(predictions)
-            validation_scores.append(validation_result['validation_score'])
-
-        # Calculate cross-validation statistics
-        mean_score = np.mean(validation_scores)
-        std_score = np.std(validation_scores)
-
-        print(f"\n📊 Cross-Validation Results:")
-        print(f"   Mean Validation Score: {mean_score:.3f} ± {std_score:.3f}")
-        print(f"   Score Range: {min(validation_scores):.3f} - {max(validation_scores):.3f}")
-
-        # Determine model reliability
-        if mean_score > 0.8:
-            reliability = "EXCELLENT"
-        elif mean_score > 0.6:
-            reliability = "GOOD"
-        elif mean_score > 0.4:
-            reliability = "MODERATE"
-        else:
-            reliability = "POOR"
-
-        print(f"   Model Reliability: {reliability}")
-
-        return {
-            'mean_score': mean_score,
-            'std_score': std_score,
-            'individual_scores': validation_scores,
-            'reliability': reliability
-        }
-
     def analyze_shark_habitat(self, species, bounds, date_range):
         """
         Analyze shark habitat for specified species, region, and time period
@@ -3183,7 +3022,7 @@ class AutomaticNASAFramework:
 
             environmental_data, real_data_info = self.auto_download_nasa_data(study_area, date_range)
 
-            # Step 2: Perform habitat prediction
+            # Step 2: Calculate the heuristic score surface.
             results = self.advanced_habitat_prediction(environmental_data)
 
             # Step 3: Add metadata
@@ -3290,7 +3129,7 @@ def run_automatic_nasa_framework():
         print("No environmental prototype grid could be prepared.")
         return None
     
-    # Step 2: Advanced habitat prediction
+    # Step 2: Calculate the heuristic score surface.
     results = framework.advanced_habitat_prediction(environmental_data)
     
     # Step 3: Display results
@@ -3303,28 +3142,28 @@ def run_automatic_nasa_framework():
     print(f"   Maximum HSI: {stats['max_hsi']:.3f}")
     print(f"   Standard Deviation: {stats['std_hsi']:.3f}")
     print(f"   Total Analysis Cells: {stats['total_cells']:,}")
-    print(f"   Suitable Habitat Cells: {stats['suitable_cells']:,}")
+    print(f"   Cells Above 0.6: {stats['suitable_cells']:,}")
     
-    print(f"\n🌊 HABITAT QUALITY DISTRIBUTION:")
+    print(f"\n🌊 PROTOTYPE SCORE DISTRIBUTION:")
     zones = stats['habitat_zones']
-    print(f"   🟢 Excellent (>0.8): {zones['excellent']:.1%}")
-    print(f"   🔵 Good (0.6-0.8): {zones['good']:.1%}")
-    print(f"   🟡 Moderate (0.4-0.6): {zones['moderate']:.1%}")
-    print(f"   🟠 Poor (0.2-0.4): {zones['poor']:.1%}")
-    print(f"   🔴 Unsuitable (<0.2): {zones['unsuitable']:.1%}")
+    print(f"   🟢 Very high (>0.8): {zones['excellent']:.1%}")
+    print(f"   🔵 High (0.6-0.8): {zones['good']:.1%}")
+    print(f"   🟡 Middle (0.4-0.6): {zones['moderate']:.1%}")
+    print(f"   🟠 Low (0.2-0.4): {zones['poor']:.1%}")
+    print(f"   🔴 Very low (<0.2): {zones['unsuitable']:.1%}")
     
     print(f"\n🛰️ INPUT PROVENANCE STATUS:")
     sst_info = environmental_data['sst']
     chl_info = environmental_data['chlorophyll']
     bath_info = environmental_data['bathymetry']
     print(f"   SST Data: {sst_info['source']}")
-    print(f"   SST Accuracy: {sst_info['accuracy']}")
+    print(f"   SST Evidence Status: {sst_info['accuracy']}")
     print(f"   SST Data Type: {sst_info['data_type']}")
     print(f"   Chlorophyll Data: {chl_info['source']}")
-    print(f"   Chlorophyll Accuracy: {chl_info['accuracy']}")
+    print(f"   Chlorophyll Evidence Status: {chl_info['accuracy']}")
     print(f"   Chlorophyll Data Type: {chl_info['data_type']}")
     print(f"   Bathymetry Data: {bath_info['source']}")
-    print(f"   Bathymetry Accuracy: {bath_info['accuracy']}")
+    print(f"   Bathymetry Evidence Status: {bath_info['accuracy']}")
     print(f"   Bathymetry Quality: {bath_info['quality']}")
     
     print(f"\n🔬 EVIDENCE BOUNDARY:")

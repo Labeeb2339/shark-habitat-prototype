@@ -21,6 +21,14 @@ class StreamlitRuntimeTests(unittest.TestCase):
         self.assertIn("not a tracking system", rendered)
         self.assertNotIn("maximum accuracy", rendered.casefold())
 
+    def test_default_score_run_completes_without_network_data(self):
+        app = AppTest.from_file("app.py").run(timeout=20)
+        app.button[0].click().run(timeout=40)
+
+        self.assertEqual(list(app.exception), [])
+        messages = "\n".join(block.value for block in app.success)
+        self.assertIn("Prototype score complete", messages)
+
 
 if __name__ == "__main__":
     unittest.main()
