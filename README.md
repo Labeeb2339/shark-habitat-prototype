@@ -1,7 +1,7 @@
 # Shark Habitat Prototype
 
-I built this Python and Streamlit prototype to explore how environmental
-variables might be combined into a shark-habitat suitability score.
+A deterministic Python and Streamlit prototype for inspecting how
+environmental variables flow into a shark-habitat suitability score.
 
 This repository is a **learning prototype**, not a wildlife-tracking system, validated ecological model, or research product.
 
@@ -19,15 +19,20 @@ dataset, an ecological benchmark, or evidence that sharks occupy a location.
 - Species-specific preference tables and heuristic suitability scoring
 - Map and chart generation with pandas, NumPy, Plotly, and related tools
 - An early workflow shaped around sea-surface temperature, chlorophyll, and bathymetry inputs
+- An opt-in NASA CMR catalog lookup kept separate from the generated grids
 
 ## Important limits
 
-- The current environmental layers used by the main prototype are simulated or generated in code.
+- The main application workflow uses generated environmental layers; it does not ingest satellite measurements.
 - Generated paths use a fixed default seed (`2339`) so the same workflow is reproducible.
+- Calling `auto_download_nasa_data(..., lookup_metadata=True)` adds a CMR catalog search, but does not change the generated grids into measurements.
 - The repository does not provide live shark locations or confirm that sharks are present in a suggested area.
 - The habitat scores have not been validated against tagged-animal observations, field surveys, or peer-reviewed ecological benchmarks.
 - No claim of professional accuracy, research-grade quality, real-time satellite ingestion, or conservation suitability is made.
-- Some older guide files describe the intended live-data direction more strongly than the implemented and verified behaviour. Treat them as historical prototype notes, not evidence.
+
+The former hard-coded telemetry example and pseudo-validation routine were
+removed: generated locations and random error cannot measure ecological model
+quality.
 
 ## Run locally
 
@@ -42,7 +47,7 @@ streamlit run app.py
 
 The runtime dependency list contains only packages imported by the application or its optional data paths. TensorFlow, scikit-learn, and Matplotlib are not required.
 
-Authenticated NASA Earthdata requests require your own runtime token. See [NASA_TOKEN_SETUP.md](NASA_TOKEN_SETUP.md); the application reads only `EARTHDATA_TOKEN` and does not need a credential committed to the repository.
+Experimental authenticated NASA Earthdata requests require your own runtime token. See [NASA_TOKEN_SETUP.md](NASA_TOKEN_SETUP.md); the code reads only `EARTHDATA_TOKEN` and does not need a credential committed to the repository. The Streamlit workflow does not require a token, and a token does not turn the prototype into a live-data or validated system.
 
 ## Verify the checkout
 

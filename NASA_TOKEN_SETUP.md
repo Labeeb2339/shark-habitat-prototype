@@ -1,6 +1,12 @@
 # NASA Earthdata token setup
 
-The prototype can make authenticated Earthdata requests when you provide your own token at runtime. A token is optional for exploring the simulated-data interface, but authenticated downloads will not work without one.
+Experimental code paths can make authenticated Earthdata requests when you
+provide your own token at runtime. The generated-data Streamlit interface does
+not require a token.
+
+Supplying a token only authorizes request attempts. It does not guarantee that
+the displayed grid contains satellite measurements, make the data current, or
+validate the habitat score.
 
 ## 1. Create your account and token
 
@@ -28,7 +34,7 @@ The variable applies only to the current shell session unless you configure your
 
 ## 3. Confirm safe setup
 
-- The application should report that authentication was configured from `EARTHDATA_TOKEN`.
+- The application should report that authentication was configured for Earthdata requests.
 - `git status` should not list a local `.env` file; `.env` is ignored by this repository.
 - Run `python -m unittest discover -s tests -v` before committing.
 

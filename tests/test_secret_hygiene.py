@@ -34,10 +34,11 @@ class SecretHygieneTests(unittest.TestCase):
 
     def test_current_tree_contains_no_jwt_shaped_string(self):
         included_suffixes = {".py", ".md", ".txt", ".yml", ".yaml", ".toml"}
+        ignored_directories = {".git", ".venv", ".pytest_cache", "__pycache__"}
         offenders = []
 
         for path in ROOT.rglob("*"):
-            if ".git" in path.parts or not path.is_file():
+            if ignored_directories.intersection(path.parts) or not path.is_file():
                 continue
             if path.suffix.lower() not in included_suffixes:
                 continue

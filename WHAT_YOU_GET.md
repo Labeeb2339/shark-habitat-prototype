@@ -1,240 +1,57 @@
-# 🎁 What You Get from SharkTracker Pro
+# Repository scope
 
-## 🌊 Simple Summary - What Does This App Actually Tell You?
+This repository packages a runnable shark-habitat **software prototype**. Its
+value is in the interface, deterministic scoring workflow, and explicit path
+toward a better data pipeline—not in a claim that it can find sharks.
 
-**SharkTracker Pro** is like having a marine biologist in your pocket! Here's what you get in plain English:
+## Included
 
----
+- A Streamlit interface for species, area, and date controls
+- Illustrative species parameter profiles
+- A deterministic heuristic suitability calculation
+- Generated SST, chlorophyll, and bathymetry fallback layers
+- An opt-in NASA CMR catalog lookup, kept separate from generated grids
+- Plotly maps, charts, and downloadable prototype reports
+- Unit tests for determinism, runtime startup, secret hygiene, and claim
+  boundaries
 
-## 🦈 **The Main Question It Answers:**
+## Not included
 
-### **"Where are sharks most likely to be found right now?"**
+- Live animal telemetry
+- A tagged-shark or field-observation dataset
+- A trained or calibrated ecological model
+- Measured accuracy, reliability, or cross-validation results
+- Guaranteed ingestion of satellite measurements
+- A basis for safety, conservation, navigation, or policy decisions
 
-Instead of guessing, you get **scientific predictions** based on:
-- 🛰️ **Real NASA satellite data** (updated every few hours)
-- 🧠 **Shark behavior knowledge** from decades of research
-- 🌊 **Ocean conditions** that sharks love or hate
+The previous hard-coded telemetry example and pseudo-validation routine were
+removed because generated locations and random spatial error cannot provide
+evidence of model quality.
 
----
+## What the score means
 
-## 📊 **What Data You Actually Get:**
+The Habitat Suitability Index (HSI) is a relative output of hand-built rules.
+It is useful for inspecting software behavior. It is not a probability that a
+shark is present and it has not been calibrated against observations.
 
-### 🎯 **1. Overall Habitat Rating**
-**Like a restaurant review, but for sharks!**
+## Verification
 
-- 🟢 **EXCELLENT** (90-100%): "Sharks LOVE it here!"
-- 🟡 **GOOD** (60-89%): "Sharks often hang out here"
-- 🟠 **MODERATE** (30-59%): "Sharks sometimes visit"
-- 🔴 **POOR** (0-29%): "Sharks rarely come here"
+Run the checks from the repository root:
 
-### 🗺️ **2. Interactive Map**
-**See exactly WHERE the good spots are!**
+```bash
+python -m compileall -q app.py automatic_nasa_framework.py tests
+python -m unittest discover -s tests -v
+python tools/render_readme_assets.py --check
+```
 
-- **Green areas**: Prime shark habitat
-- **Yellow areas**: Decent shark habitat
-- **Red areas**: Poor shark habitat
-- **Click anywhere**: Get details for that exact spot
-- **Zoom in/out**: Explore at any scale
+## What would make it research-capable
 
-### 📈 **3. Simple Statistics**
-**Easy-to-understand numbers:**
+1. Choose named, licensed environmental and animal-observation datasets.
+2. Record provenance, units, timestamps, transformations, and fallback status
+   for every grid cell.
+3. Replace illustrative parameters with a documented model specification.
+4. Freeze spatial and temporal evaluation splits before measuring results.
+5. Report baselines, uncertainty, failure cases, and negative results.
+6. Obtain review from a marine scientist before making ecological claims.
 
-- **"X% of this area is excellent habitat"**
-- **"Y locations have good conditions"**
-- **"Best spots found at these coordinates"**
-
-### 🦈 **4. Species-Specific Info**
-**What each shark actually wants:**
-
-#### **Great White Sharks** 🔥
-- **Love**: Cool water, seal colonies, temperature boundaries
-- **Best time**: Fall (September-November)
-- **Best places**: California, South Africa, Australia
-
-#### **Tiger Sharks** 🌴
-- **Love**: Warm tropical water, coral reefs, everything is food!
-- **Best time**: Year-round in tropics
-- **Best places**: Hawaii, Caribbean, Indo-Pacific
-
-#### **Bull Sharks** 🏞️
-- **Love**: Very warm shallow water, river mouths, mangroves
-- **Best time**: Spring and summer
-- **Best places**: Florida, Gulf of Mexico, river deltas
-
-#### **Whale Sharks** 🐋
-- **Love**: Warm water with lots of plankton
-- **Best time**: When plankton blooms occur
-- **Best places**: Maldives, Philippines, Mexico
-
-#### **And 20 more species!** Each with unique preferences
-- **Basking Shark**: Cool water filter feeder
-- **Thresher Shark**: Tail-stunning hunter
-- **Nurse Shark**: Gentle reef dweller
-- **Caribbean Reef Shark**: Coral reef specialist
-- **Lemon Shark**: Mangrove nursery user
-- **Blacktip Shark**: Fast coastal hunter
-- **Sandbar Shark**: Continental shelf dweller
-- **Spinner Shark**: Acrobatic surface feeder
-- **Dusky Shark**: Long-distance migrator
-- **Silky Shark**: Open ocean traveler
-- **Porbeagle Shark**: Cold water speedster
-- **Longfin Mako**: Deep-diving tropical predator
-- **Salmon Shark**: Cold-water endothermic hunter
-- **Sand Tiger**: Temperate coastal ambush predator
-- **Scalloped Hammerhead**: Schooling tropical species
-- **Smooth Hammerhead**: Migratory temperate species
-- **Bonnethead**: Shallow-water omnivorous species
-- **And more families represented!**
-
----
-
-## 🤔 **What This Means for Different People:**
-
-### 👨‍🎓 **Students & Teachers**
-**Perfect for school projects!**
-- **Science fair projects**: Compare shark habitats across seasons
-- **Geography lessons**: Learn how ocean conditions vary globally
-- **Biology class**: Understand predator-prey relationships
-- **Climate studies**: See how warming oceans affect marine life
-
-### 🏊‍♂️ **Ocean Enthusiasts**
-**Plan your ocean adventures!**
-- **Diving trips**: Understand marine life in your dive areas
-- **Beach visits**: Learn about local marine ecosystems
-- **Photography**: Know when/where marine life is most active
-- **Conservation**: Support areas with important shark habitats
-
-### 🔬 **Researchers & Conservationists**
-**Professional-grade data!**
-- **Habitat studies**: Identify critical shark habitats
-- **Conservation planning**: Design marine protected areas
-- **Climate research**: Track habitat changes over time
-- **Population studies**: Understand shark distribution patterns
-
-### 🌊 **Marine Life Lovers**
-**Satisfy your curiosity!**
-- **Learn shark behavior**: Understand what drives shark movements
-- **Track migrations**: See seasonal habitat changes
-- **Compare species**: Learn how different sharks have different needs
-- **Ocean education**: Become an ocean expert!
-
----
-
-## 🎮 **How Easy Is It to Use?**
-
-### **Super Simple 3-Step Process:**
-
-#### **Step 1: Pick Your Shark** 🦈
-Choose from 24 species - each one is different!
-
-#### **Step 2: Pick Your Location** 🗺️
-- Use preset locations (California, Hawaii, Florida, etc.)
-- Or set custom coordinates anywhere in the world
-
-#### **Step 3: Get Your Answer** 📊
-Click "Analyze" and get instant results!
-
-### **No Coding Required!** 💻
-- Point-and-click interface
-- Everything explained in plain English
-- Interactive maps and charts
-- Download results for later
-
----
-
-## 🎁 **Bonus Features You Get:**
-
-### 📱 **Multiple Ways to View Results:**
-1. **🗺️ Interactive Map**: Visual habitat quality
-2. **📊 Charts & Graphs**: Statistical breakdowns
-3. **🥧 Quality Breakdown**: Detailed percentages
-4. **📋 Scientific Report**: Professional analysis
-5. **🌊 Simple Summary**: Plain English explanation
-
-### 🎓 **Educational Content:**
-- **Species profiles**: Learn about each shark
-- **Habitat explanations**: Understand what sharks need
-- **Fun facts**: Amazing shark trivia
-- **Conservation info**: Why sharks matter
-
-### 💾 **Export Everything:**
-- **Download maps** as images
-- **Export data** for spreadsheets
-- **Save reports** as text files
-- **Share results** with others
-
----
-
-## 🌟 **What Makes This Special?**
-
-### 🛰️ **Real NASA Data**
-- **Not fake or simulated** - actual satellite measurements
-- **Updated every few hours** - always current
-- **Global coverage** - works anywhere in the world
-- **40+ years of history** - see long-term changes
-
-### 🧠 **Smart Science**
-- **Based on real research** - not guesswork
-- **Species-specific models** - each shark is different
-- **Validated accuracy** - tested against real observations
-- **Professional quality** - used by researchers
-
-### 🎯 **User-Friendly Design**
-- **No PhD required** - anyone can use it
-- **Multiple explanation levels** - from simple to detailed
-- **Interactive and fun** - engaging for all ages
-- **Educational value** - learn while exploring
-
----
-
-## 🤓 **Fun Examples of What You Can Discover:**
-
-### 🔍 **Cool Questions You Can Answer:**
-- "Where are the best Great White habitats in California right now?"
-- "How do Tiger Shark habitats in Hawaii change with seasons?"
-- "What makes the perfect Bull Shark nursery area?"
-- "Where would I find Whale Sharks feeding right now?"
-
-### 🎉 **Surprising Things You'll Learn:**
-- **Sharks are picky eaters** - each species has specific preferences
-- **Ocean temperature matters** - even 2°C can make a huge difference
-- **Sharks follow invisible highways** - thermal fronts and currents
-- **Seasons change everything** - shark habitats shift throughout the year
-
-### 🌍 **Global Exploration:**
-- **Compare shark habitats** across different continents
-- **Track seasonal migrations** as habitats change
-- **Discover hotspots** you never knew existed
-- **Understand climate impacts** on marine ecosystems
-
----
-
-## 🎯 **Bottom Line: What You Actually Get**
-
-**SharkTracker Pro gives you the power to:**
-
-✅ **Predict where sharks are** using real NASA satellite data  
-✅ **Understand shark behavior** through species-specific analysis  
-✅ **Explore ocean ecosystems** with interactive global maps  
-✅ **Learn marine science** through hands-on discovery  
-✅ **Support conservation** by understanding critical habitats  
-✅ **Satisfy curiosity** about the ocean's top predators  
-
-**It's like having a marine research lab at your fingertips!** 🦈🛰️🌊
-
----
-
-## 🚀 **Ready to Explore?**
-
-**Start your shark habitat adventure today!**
-
-1. **Launch the app**: `streamlit run app.py`
-2. **Pick a shark species** you're curious about
-3. **Choose a location** you want to explore
-4. **Discover amazing insights** about shark habitats!
-
-**The ocean's secrets are waiting for you to discover them!** 🌊🔍🦈
-
----
-
-*SharkTracker Pro - Making marine science accessible, engaging, and fun for everyone!*
+Until then, present the project as a transparent learning prototype.
